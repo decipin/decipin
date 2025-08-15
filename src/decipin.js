@@ -50,6 +50,8 @@ function getDeciPin(lat, lon, includeSeparators = true) {
 const DECIPIN_REGEX = /^([0-9]{4})\.?([A-J]{2})([0-9]{2})\/?([Q-Z]{2})([0-9]{2})$/;
 
 function getLatLonFromDeciPin(deciPin) {
+  deciPin = deciPin.toUpperCase(); // Ensure uppercase for consistency
+
   if (!DECIPIN_REGEX.test(deciPin)) throw new Error('Invalid DeciPin');
   
   deciPin = deciPin.replace(/\./, '').replace(/\//, '');
