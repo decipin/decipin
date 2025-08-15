@@ -11,8 +11,8 @@
  */
 
 
-const DECIPIN_START_HI = 'A'; // To encode numeric digits 0-9 to A-J for the first two characters of latitude
-const DECIPIN_START_LO = 'Q'; // To encode numeric digits 0-9 to Q-Z for the last two characters of latitude
+const DECIPIN_START_HI = 'A'; // To encode numeric digits 0-9 to A-J for the first two characters of latitude after the decimal point
+const DECIPIN_START_LO = 'Q'; // To encode numeric digits 0-9 to Q-Z for the last two characters of latitude after the decimal point
 
 const DECIPIN_BOUNDS = {
   minLat: 0,
