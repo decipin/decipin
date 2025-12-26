@@ -1,15 +1,11 @@
 /**
  * DeciPin Encoder and Decoder
- * Developed by Anup Som
  * Released under an open source license for public use
  *
  * This contains two main functions:
  *  - getDeciPin(lat, lon): Encodes latitude and longitude into a 12 character alphanumeric DeciPin with optional separators
  *  - getLatLonFromDeciPin(deciPin): Decodes a DeciPin back into the latitude and longitude of the center of the smallest box
- * and a test function to validate encoding and decoding
- *  - testDeciPinEncodeDecode(iterations): Tests the encoding and decoding process for a specified number of iterations
  */
-
 
 const DECIPIN_START_HI = 'A'; // To encode numeric digits 0-9 to A-J for the first two characters of latitude after the decimal point
 const DECIPIN_START_LO = 'Q'; // To encode numeric digits 0-9 to Q-Z for the last two characters of latitude after the decimal point
@@ -47,14 +43,14 @@ function getDeciPin(lat, lon, includeSeparators = true) {
   return deciPin;
 }
 
-const DECIPIN_REGEX = /^([0-9]{4})\.?([A-J]{2})([0-9]{2})\/?([Q-Z]{2})([0-9]{2})$/;
+const DECIPIN_REGEX = /^([0-9]{4})[\.-]?([A-J]{2})([0-9]{2})[\/-]?([Q-Z]{2})([0-9]{2})$/;
 
 function getLatLonFromDeciPin(deciPin) {
   deciPin = deciPin.toUpperCase(); // Ensure uppercase for consistency. DeciPin is not case sensitive
 
   if (!DECIPIN_REGEX.test(deciPin)) throw new Error('Invalid DeciPin');
   
-  deciPin = deciPin.replace(/\./, '').replace(/\//, '');
+  deciPin = deciPin.replace(/[.\/-]/g, '');
 
   const A0offset = DECIPIN_START_HI.charCodeAt(0) - '0'.charCodeAt(0);
   const Q0offset = DECIPIN_START_LO.charCodeAt(0) - '0'.charCodeAt(0);
@@ -71,32 +67,13 @@ function getLatLonFromDeciPin(deciPin) {
       + deciPin.substring(10,12)
       + '5'; // Append 5 for center of box
 
-  return {
-    lat: parseFloat(latStr),
-    lon: parseFloat(lonStr)
+  return {    
+    //returns strings, fastest
+    lat: latStr,
+    lon: lonStr
+    
+    //returns floats, slightly slower
+    //lat: +latStr,
+    //lon: +lonStr
   };
-}
-
-
-
-function testDeciPinEncodeDecode(iterations=1_000_000) {
-  const ERROR_TOLERANCE = 0.00005; // Tolerance for lat/lon comparison
-  for (let i = 0; i < iterations; i++) {
-    let lat = DECIPIN_BOUNDS.minLat + Math.random() * (DECIPIN_BOUNDS.maxLat - DECIPIN_BOUNDS.minLat);
-    let lon = DECIPIN_BOUNDS.minLon + Math.random() * (DECIPIN_BOUNDS.maxLon - DECIPIN_BOUNDS.minLon);
-    const deciPin = getDeciPin(lat, lon);
-    const latlon = getLatLonFromDeciPin(deciPin);
-    //console.log(`Testing DeciPin: ${deciPin} for lat: ${lat}, lon: ${lon}, error: ${Math.max(Math.abs(latlon.lat - lat), Math.abs(latlon.lon - lon))}`);
-    if (Math.abs(latlon.lat - lat) > ERROR_TOLERANCE || Math.abs(latlon.lon - lon) > ERROR_TOLERANCE) {
-      throw new Error(`DeciPin encode/decode mismatch: ${deciPin} for lat: ${lat}, lon: ${lon}, error: ${Math.max(Math.abs(latlon.lat - lat), Math.abs(latlon.lon - lon))}`);
-    }
-    if (!(deciPin.length == 12 || deciPin.length == 14)) {
-      throw new Error(`DeciPin length mismatch: ${deciPin} for lat: ${lat}, lon: ${lon}`);
-    }
-    if (!DECIPIN_REGEX.test(deciPin)) {
-      throw new Error(`DeciPin regex mismatch: ${deciPin} for lat: ${lat}, lon: ${lon}`);
-    }
-  }
-  console.log(`All ${iterations} DeciPin tests passed successfully.`);
-  return true;
 }
